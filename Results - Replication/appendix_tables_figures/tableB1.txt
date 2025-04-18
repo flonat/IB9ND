@@ -1,0 +1,13 @@
+	(1)	(2)	(3)	(4)	(5)	(6)
+	Sample: log_value_cont_eu_q1_q12	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: trade_imp_eu_q1_q12	Sample: trade_imp_eu_q1_q12
+VARIABLES	3-month MA	6-month MA	3-month MA	6-month MA	3-month MA	6-month MA
+						
+ln_mfn_risk_c1_x_ma3	-2.290***		-0.402*		-1.046**	
+	(0.639)		(0.222)		(0.435)	
+ln_mfn_risk_c1_x_ma6		-3.201*		-0.881		-1.618
+		(1.689)		(0.775)		(1.075)
+						
+Observations	1,308	654	2,874	1,437	2,412	1,161
+R2	0.946	0.986	0.815	0.882	0.945	0.958
+Robust standard errors in parentheses						
+*** p<0.01, ** p<0.05, * p<0.1						

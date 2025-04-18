@@ -1,0 +1,10 @@
+	(1)	(2)	(3)	(4)
+VARIABLES	Pre-Referendum	Post-Article 50	Excluding Outliers	Non-Financial
+				
+ln_mfn_risk_c1_x_me	-2.649		-1.800***	-1.661***
+	(3.123)		(0.367)	(0.434)
+				
+Observations	436	1,526	2,484	2,088
+Dep Var	3.989	3.989	3.989	3.989
+Robust standard errors in parentheses				
+*** p<0.01, ** p<0.05, * p<0.1				

@@ -1,0 +1,5 @@
+Table 6: Brexit Uncertainty Impacts at Average Risk
+	OLS Export	IV Export	OLS Participation	IV Participation	
+Elasticity	      -0.093	           .	      -0.028	           .	
+Referendum	     -12.061	           .	      -3.617	           .	
+Referendum + Art50	     -19.791	           .	      -5.935	           .	

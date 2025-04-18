@@ -1,0 +1,12 @@
+	(1)	(2)	(3)
+	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: trade_imp_eu_q1_q12
+	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter
+VARIABLES	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S
+			
+ln_mfn_risk_c1_x_ma	-1.753***	-0.436***	-1.272***
+	(0.347)	(0.105)	(0.331)
+			
+Observations	2,616	5,748	4,980
+R2	0.938	0.799	0.938
+Robust standard errors in parentheses			
+*** p<0.01, ** p<0.05, * p<0.1			

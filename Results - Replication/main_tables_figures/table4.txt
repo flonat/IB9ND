@@ -1,0 +1,12 @@
+	(1)	(2)	(3)	(4)	(5)	(6)	(7)	(8)	(9)	(10)	(11)	(12)
+	Sample: log_value_cont_eu_q1_q12	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: trade_imp_eu_q1_q12	Sample: trade_imp_eu_q1_q12	Sample: log_value_cont_eu_q1_q12	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q12	Sample: trade_imp_eu_q1_q12	Sample: trade_imp_eu_q1_q12
+	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter
+VARIABLES	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S S*quarter
+												
+ln_mfn_risk_c1_x_me	-1.695***	-0.897***	-0.383***	-0.365***	-1.236***	-0.848***	-1.695***	-0.897***	-0.383***	-0.365***	-1.236***	-0.848***
+	(0.360)	(0.322)	(0.110)	(0.125)	(0.333)	(0.295)	(0.360)	(0.322)	(0.110)	(0.125)	(0.333)	(0.295)
+												
+Observations	4,692	4,692	11,616	11,616	8,855	8,855	4,692	4,692	11,616	11,616	8,855	8,855
+R2	0.946	0.948	0.825	0.831	0.960	0.962	0.946	0.948	0.825	0.831	0.960	0.962
+Robust standard errors in parentheses												
+*** p<0.01, ** p<0.05, * p<0.1												

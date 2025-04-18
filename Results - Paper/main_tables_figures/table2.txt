@@ -1,0 +1,12 @@
+	(1)	(2)	(3)	(4)	(5)	(6)	(7)	(8)
+	Sample: log_value_cont_eu_q1_q8	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q8	Sample: pos_tr_non_d_eu_q1_q12	Sample: log_value_cont_eu_q1_q8	Sample: log_value_cont_eu_q1_q12	Sample: pos_tr_non_d_eu_q1_q8	Sample: pos_tr_non_d_eu_q1_q12
+	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter	SE: cluster J#S#quarter
+VARIABLES	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S	FE:J#I#quarter J#I#S
+								
+ln_mfn_risk_c1_x_me	-1.666***	-1.766***	-0.392***	-0.444***	-1.666***	-1.766***	-0.392***	-0.444***
+	(0.327)	(0.363)	(0.100)	(0.109)	(0.327)	(0.363)	(0.100)	(0.109)
+								
+Observations	1,744	2,616	3,832	5,748	1,744	2,616	3,832	5,748
+R2	0.945	0.938	0.828	0.799	0.945	0.938	0.828	0.799
+Robust standard errors in parentheses								
+*** p<0.01, ** p<0.05, * p<0.1								

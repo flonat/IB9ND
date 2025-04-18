@@ -1,0 +1,31 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Table B3: Services Risk and UK-EU Robustness to Sample Selection}
+\begin{tabular}{l*{12}{c}}
+\hline\hline
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}&\multicolumn{1}{c}{(9)}&\multicolumn{1}{c}{(10)}&\multicolumn{1}{c}{(11)}&\multicolumn{1}{c}{(12)}\\
+            &\multicolumn{1}{c}{log\_value\_cont}&\multicolumn{1}{c}{log\_value\_cont}&\multicolumn{1}{c}{log\_value\_cont}&\multicolumn{1}{c}{log\_value\_cont}&\multicolumn{1}{c}{pos\_tr\_non\_d}&\multicolumn{1}{c}{pos\_tr\_non\_d}&\multicolumn{1}{c}{pos\_tr\_non\_d}&\multicolumn{1}{c}{pos\_tr\_non\_d}&\multicolumn{1}{c}{trade\_imp}&\multicolumn{1}{c}{trade\_imp}&\multicolumn{1}{c}{trade\_imp}&\multicolumn{1}{c}{trade\_imp}\\
+\hline
+alt\_risk1\_x\_mean&      -2.093\sym{***}&                     &                     &                     &      -0.767\sym{***}&                     &                     &                     &      -0.649         &                     &                     &                     \\
+            &     (0.625)         &                     &                     &                     &     (0.210)         &                     &                     &                     &     (0.397)         &                     &                     &                     \\
+[1em]
+alt\_risk2\_x\_mean&                     &       1.540\sym{***}&                     &                     &                     &      -0.339         &                     &                     &                     &       1.934\sym{***}&                     &                     \\
+            &                     &     (0.538)         &                     &                     &                     &     (0.217)         &                     &                     &                     &     (0.313)         &                     &                     \\
+[1em]
+alt\_risk3\_x\_mean&                     &                     &     -13.380\sym{***}&                     &                     &                     &      -3.351\sym{**} &                     &                     &                     &      -6.009\sym{**} &                     \\
+            &                     &                     &     (3.964)         &                     &                     &                     &     (1.337)         &                     &                     &                     &     (2.449)         &                     \\
+[1em]
+comp\_risk\_x\_mean&                     &                     &                     &      -0.871         &                     &                     &                     &      -1.487\sym{***}&                     &                     &                     &       1.904\sym{***}\\
+            &                     &                     &                     &     (1.105)         &                     &                     &                     &     (0.461)         &                     &                     &                     &     (0.437)         \\
+[1em]
+\_cons      &                     &                     &                     &                     &                     &                     &                     &                     &       5.111\sym{***}&       5.002\sym{***}&       5.142\sym{***}&       5.023\sym{***}\\
+            &                     &                     &                     &                     &                     &                     &                     &                     &     (0.019)         &     (0.014)         &     (0.024)         &     (0.015)         \\
+\hline
+\(N\)       &        1744         &        1744         &        1744         &        1744         &        3832         &        3832         &        3832         &        3832         &        3216         &        3216         &        3216         &        3216         \\
+Dependent Variable&log\_value\_cont         &log\_value\_cont         &log\_value\_cont         &log\_value\_cont         &pos\_tr\_non\_d         &pos\_tr\_non\_d         &pos\_tr\_non\_d         &pos\_tr\_non\_d         &   trade\_imp         &   trade\_imp         &   trade\_imp         &   trade\_imp         \\
+Sample      &                     &                     &                     &                     &                     &                     &                     &                     &                     &                     &                     &                     \\
+\hline\hline
+\multicolumn{13}{l}{\footnotesize All regressions include Importer-Exporter-Quarter and Importer-Exporter-Service FE. Standard errors clustered at Service-Quarter level.}\\
+\multicolumn{13}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

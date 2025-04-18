@@ -1,0 +1,11 @@
+	(1)	(2)	(3)
+VARIABLES	Rate + Volatility	Rate × Risk	Post-Ref Rate
+			
+ln_mfn_risk_c1_x_me	-1.240***	-1.774***	-1.240***
+	(0.333)	(0.455)	(0.333)
+exch_x_risk_c1		-13.759*	
+		(7.212)	
+			
+Observations	4,980	4,980	4,980
+Robust standard errors in parentheses			
+*** p<0.01, ** p<0.05, * p<0.1			

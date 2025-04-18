@@ -1,0 +1,15 @@
+	(1)	(2)	(3)	(4)	(5)
+VARIABLES	Baseline	3-month MA	Composite Risk	No Outliers	Exch×Risk
+					
+ln_mfn_risk_c1_x_me	-1.240***			-1.282***	-1.774***
+	(0.333)			(0.340)	(0.455)
+ln_mfn_risk_c1_x_ma3		-1.046**			
+		(0.435)			
+comp_risk_x_mean			1.904***		
+			(0.437)		
+exch_x_risk_c1					-13.759*
+					(7.212)
+					
+Observations	4,980	2,412	3,216	4,848	4,980
+Robust standard errors in parentheses					
+*** p<0.01, ** p<0.05, * p<0.1					

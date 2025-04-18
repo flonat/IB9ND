@@ -1,0 +1,911 @@
+----------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwi
+> ck/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Re
+> sults - Paper/main.log
+  log type:  text
+ opened on:   8 Apr 2025, 17:20:03
+
+. use brexit_services_main_sample, clear 
+
+. gen all=1 if eu_minus_gb==1  /*EU*/ 
+(9,492 missing values generated)
+
+. gen all_but_air=1 if all==1 & servicet~="Air transportation" /*EU w/out air*/
+(10,020 missing values generated)
+
+. 
+. *Figure 1: UK Foreign Entry STRI: MFN, Preferential and Risk Measures
+. label define service 2 "Architect., engineer., scientific", modify
+
+. label define service 3 "Audiovisual and related", modify
+
+. label define service 2 "Architecture, engineering, scientific", modify
+
+. label define service 6 "Financial", modify
+
+. label define service 8 "Legal, accounting, consulting", modify
+
+. label define service 9 "Other transportation", modify
+
+. label define service 10 "Postal and courier", modify
+
+. label define service 12 "Telecommunications", modify
+
+. 
+. graph hbar (mean) mfn_risk_c1 (mean) stri_c1 (mean) eea_stri_c1 if importer=="GBR" & quarter==1 & all==1, over
+> (S, sort(mfn_risk_c1) label(angle(horizontal) labsize(small))) bar(1, fintensity(inten40) lcolor(red)) bar(2, 
+> fcolor(dknavy)) bar(3, fcolor(none)) ytitle("") legend(order(1 "Risk" 2 "MFN TRI" 3 "Preferential TRI") nostac
+> k cols(1) position(1) ring(0)) 
+
+. graph export "$main_output/fig1.pdf", replace
+file /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies &
+    Research/Universities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal
+    Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper/main_tables_figures/fig1.pdf saved
+    as PDF format
+
+. 
+. *Figure 2: EU Foreign Entry STRI: Risk Measures
+. graph hbar (mean) mfn_risk_c1 (sd) mfn_risk_c1 if importer~="GBR" & quarter==1 & all==1, over(S, sort(mfn_risk
+> _c1) label(angle(horizontal) labsize(small))) bar(1, fintensity(inten40) lcolor(red)) bar(2, lcolor(black) fco
+> lor(none)) ytitle("") legend(order(1 "Risk Mean" 2 "Risk Standard Deviation") nostack cols(1) position(1) ring
+> (0)) 
+
+. graph export "$main_output/fig2.pdf", replace
+file /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies &
+    Research/Universities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal
+    Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper/main_tables_figures/fig2.pdf saved
+    as PDF format
+
+. 
+. **Use only TABLE 2 sample for Figures 3 and 4 (OLS, STRI 1, me for brexit probability and all_but_air EU sampl
+> e)
+. foreach y in log_value_cont pos_tr_non_d{
+  2.         foreach q in 12 {
+  3.                 qui reghdfe `y' ln_mfn_risk_c1_x_me if quarter<=`q' & all_but_air==1, absorb(J#I#quarter J#
+> I#S) vce(cluster J#S#quarter)  nocons
+  4.                 gen `y'_sample=e(sample)
+  5.         }
+  6. }
+
+. save test.dta, replace
+(file test.dta not found)
+file test.dta saved
+
+. 
+. **A single loop is used to generate both Figure 3 and Figure 4
+. local k=3 
+
+. foreach y in log_value_cont pos_tr_non_d { 
+  2. **Figure 3 generated when y is log_value_cont in the loop 
+. **Figure 4 generated when y is pos_tr_non_d in the loop 
+. 
+. **Defining hi vs low based on continuing subsample
+. ***VALUES***
+.         use test, clear
+  3.         keep if `y'_sample==1
+  4.         save del, replace
+  5.         keep J S mfn_risk_c1
+  6.         duplicates drop
+  7.         bysort J: egen med=median(mfn_risk_c1)
+  8.         gen hi=1 if mfn_risk_c1>med & mfn_risk_c1~=.
+  9.         replace hi=0 if mfn_risk_c1<=med & mfn_risk_c1~=.
+ 10.         drop mfn_risk_c1
+ 11.         sort J S 
+ 12.         save class_hi, replace
+ 13.         use del, clear
+ 14.         sort J S
+ 15.         merge J S using class_hi 
+ 16.         gen initial= `y' if quarter ==1
+ 17.         bysort I J S: egen dif=min(initial)
+ 18.         replace dif= `y'-dif
+ 19.         sum dif if quarter==1
+ 20. 
+. **graphs 
+.         sum brexit_me
+ 21.         gen brexit=brexit_me
+ 22.         replace brexit=1 if brexit_me==. & quarter>5
+ 23.         bysort quarter: egen mean_hi=mean(dif) if hi==1
+ 24.         bysort quarter: egen mean_low=mean(dif) if hi==0
+ 25.         sort quarter
+ 26.                 
+.         twoway  (line brexit quarter, lcolor(maroon)) (line mean_low quarter,lcolor(blue) lpattern(dash) yaxis
+> (2)) (line mean_hi quarter if hi==1, lcolor(blue) yaxis(2)), ytitle("") xtitle("") xlabel(1 "16Q1" 2 "16Q2" 3 
+> "16Q3" 4 "16Q4" 5 "17Q1" 6 "17Q2" 7 "17Q3" 8 "17Q4" 9 "18Q1" 10 "18Q2" 11 "18Q3" 12 "18Q4") xmtick(, valuelabe
+> l) legend(order(2 "Low" 3 "High") rows(2) rowgap(large) region(fcolor(%0) lcolor(none)) position(4) ring(0)) y
+> title(Probability, color(maroon)) ytitle(Change vs. 2016Q1, color(blue) axis(2)) ylab(,nogrid) xline(2.5 5.5, 
+> lwidth(thin)) text(.9 3.5 "Referendum") text(.9 6 "Art. 50") 
+ 27.         graph export "$main_output/fig`k'.pdf",replace
+ 28. 
+.         local ++k
+ 29.         erase del.dta
+ 30.         erase class_hi.dta
+ 31.         
+.         }
+(13,152 observations deleted)
+(file del.dta not found)
+file del.dta saved
+
+Duplicates in terms of all variables
+
+(2,484 observations deleted)
+(71 missing values generated)
+(71 real changes made)
+(file class_hi.dta not found)
+file class_hi.dta saved
+(you are using old merge syntax; see [D] merge for new syntax)
+variables J S do not uniquely identify observations in the master data
+(label importer already defined)
+(label service already defined)
+(2,398 missing values generated)
+(2,535 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         dif |        218           0           0          0          0
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+brexit_mea~q |      1,744    .6510363    .3564598   .1182188          1
+(872 missing values generated)
+(872 real changes made)
+(1,272 missing values generated)
+(1,344 missing values generated)
+file /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies &
+    Research/Universities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal
+    Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper/main_tables_figures/fig3.pdf saved
+    as PDF format
+(10,020 observations deleted)
+(file del.dta not found)
+file del.dta saved
+
+Duplicates in terms of all variables
+
+(5,500 observations deleted)
+(133 missing values generated)
+(133 real changes made)
+(file class_hi.dta not found)
+file class_hi.dta saved
+(you are using old merge syntax; see [D] merge for new syntax)
+variables J S do not uniquely identify observations in the master data
+(label importer already defined)
+(label service already defined)
+(5,269 missing values generated)
+(4,589 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         dif |        479           0           0          0          0
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+brexit_mea~q |      3,832    .6510363    .3564041   .1182188          1
+(1,916 missing values generated)
+(1,916 real changes made)
+(3,108 missing values generated)
+(2,640 missing values generated)
+file /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies &
+    Research/Universities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal
+    Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper/main_tables_figures/fig4.pdf saved
+    as PDF format
+
+. erase test.dta
+
+. drop _all
+
+. graph close 
+
+. 
+. **Main Tables
+. *Table 1: Regression Data Summary Statistics Bilateral-Industry in Quarters 2016Q1-2018Q4  and Table 2: Servic
+> es Risk and EU-UK (OLS)
+. use brexit_services_main_sample, clear 
+
+. 
+. gen all=1 if eu_minus_gb==1  /*EU*/ 
+(9,492 missing values generated)
+
+. gen all_but_air=1 if all==1 & servicet~="Air transportation" /*EU w/out air*/
+(10,020 missing values generated)
+
+. 
+. *Table 1: Summary Statistics Bilateral-Industry in Quarters 2016Q1-2018Q4   
+. //Continously Traded Exports Sample
+. //Label Variables to match Table Output
+. label var log_value_cont "Exports (ln)" 
+
+. label var stri_c1 "STRI Category 1"
+
+. label var eea_stri_c1 "EEA STRI Category 1"
+
+. label var ln_mfn_risk_c1_x_me "Pr(Brexit) x Risk (ln)"
+
+. label var ln_brexit_me "Pr(Brexit) (ln)"
+
+. label var mfn_risk_c1 "Risk"
+
+. label var pos_tr_non_d "Exported" 
+
+. 
+. eststo clear
+
+. qui reghdfe log_value_cont ln_mfn_risk_c1_x_me if all_but_air==1, absorb(J#I#quarter J#I#S) vce(cluster J#S#qu
+> arter)  nocons
+
+. estpost tabstat log_value_cont stri_c1 eea_stri_c1 ln_mfn_risk_c1_x_me ln_brexit_me mfn_risk_c1 if e(sample),s
+> t(mean sd min max N) columns(statistics)
+
+Summary statistics: mean sd min max count
+     for variables: log_value_cont stri_c1 eea_stri_c1 ln_mfn_risk_c1_x_me ln_brexit_me mfn_risk_c1
+
+             |   e(mean)      e(sd)     e(min)     e(max)   e(count) 
+-------------+-------------------------------------------------------
+log_value_~t |  3.366019   1.525793          0   7.101676       2616 
+     stri_c1 |  .0631395    .038824   .0056831   .3067615       2616 
+ eea_stri_c1 |   .010227   .0134654          0   .0683872       2616 
+ln_mf~1_x_me |  -.024349   .0497813  -.5049747          0       2616 
+ln_brexit_me | -.4639862   .7647624  -2.135218          0       2616 
+ mfn_risk_c1 |  .0524779   .0329317          0   .2364979       2616 
+
+. esttab using "$main_output/table1.txt", cells("mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3)) count(fmt(0))")
+>  replace noobs label varwidth(25) nonumbers   
+(output written to /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK
+> /Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revi
+> sed/Results - Paper/main_tables_figures/table1.txt)
+
+.         
+. // Export Participation Sample
+. qui reghdfe pos_tr_non_d ln_mfn_risk_c1_x_me if all_but_air==1, absorb(J#I#quarter J#I#S) vce(cluster J#S#quar
+> ter)  nocons
+
+. estpost tabstat pos_tr_non_d stri_c1 eea_stri_c1 ln_mfn_risk_c1_x_me if e(sample),st(mean sd min max N) column
+> s(statistics)
+
+Summary statistics: mean sd min max count
+     for variables: pos_tr_non_d stri_c1 eea_stri_c1 ln_mfn_risk_c1_x_me
+
+             |   e(mean)      e(sd)     e(min)     e(max)   e(count) 
+-------------+-------------------------------------------------------
+pos_tr_non_d |  .7799235   .4143341          0          1       5748 
+     stri_c1 |  .0582713   .0360512   .0056831   .3067615       5748 
+ eea_stri_c1 |  .0090119   .0117178          0   .0683872       5748 
+ln_mf~1_x_me | -.0226751   .0466264  -.5049747          0       5748 
+
+. esttab using "$main_output/table1.txt", cells("mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3)) count(fmt(0))")
+>  noobs label append varwidth(25) nonumbers
+(output written to /Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK
+> /Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revi
+> sed/Results - Paper/main_tables_figures/table1.txt)
+
+.         
+. * Table 2: Services Risk and EU-UK (OLS)
+. foreach y in log_value_cont pos_tr_non_d {
+  2.         foreach q in 8 12 {
+  3.                 reghdfe `y' ln_mfn_risk_c1_x_me if quarter<=`q' & all_but_air==1, absorb(J#I#quarter J#I#S)
+>  vce(cluster J#S#quarter)  nocons
+  4.                 outreg2 using "$main_output/table2", se  excel ctitle(Sample: `y'_eu_q1_q`q', SE: cluster J
+> #S#quarter, FE:J#I#quarter J#I#S ) addstat(R2, e(r2_a)) append dec(3) nocons nor2 
+  5.         }
+  6. }
+(dropped 32 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =      1,744
+Absorbing 2 HDFE groups                           F(   1,   1055) =      25.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9601
+                                                  Adj R-squared   =     0.9454
+                                                  Within R-sq.    =     0.0150
+Number of clusters (J#S#quarter) =      1,056     Root MSE        =     0.3589
+
+                               (Std. err. adjusted for 1,056 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+     log_value_cont | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |    -1.6659   .3269371    -5.10   0.000     -2.30742   -1.024379
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       288           0         288     |
+           J#I#S |       218          36         182     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table2.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table2.txt""':seeout}
+(dropped 48 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =      2,616
+Absorbing 2 HDFE groups                           F(   1,   1583) =      23.65
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9522
+                                                  Adj R-squared   =     0.9375
+                                                  Within R-sq.    =     0.0117
+Number of clusters (J#S#quarter) =      1,584     Root MSE        =     0.3814
+
+                               (Std. err. adjusted for 1,584 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+     log_value_cont | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -1.766265   .3632049    -4.86   0.000    -2.478679   -1.053852
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       432           0         432     |
+           J#I#S |       218          36         182     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table2.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table2.txt""':seeout}
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =      3,832
+Absorbing 2 HDFE groups                           F(   1,   1983) =      15.28
+Statistics robust to heteroskedasticity           Prob > F        =     0.0001
+                                                  R-squared       =     0.8636
+                                                  Adj R-squared   =     0.8284
+                                                  Within R-sq.    =     0.0033
+Number of clusters (J#S#quarter) =      1,984     Root MSE        =     0.1746
+
+                               (Std. err. adjusted for 1,984 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+       pos_tr_non_d | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.3923211   .1003539    -3.91   0.000    -.5891312   -.1955109
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       352           0         352     |
+           J#I#S |       479          44         435     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table2.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table2.txt""':seeout}
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =      5,748
+Absorbing 2 HDFE groups                           F(   1,   2975) =      16.70
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.8329
+                                                  Adj R-squared   =     0.7993
+                                                  Within R-sq.    =     0.0029
+Number of clusters (J#S#quarter) =      2,976     Root MSE        =     0.1856
+
+                               (Std. err. adjusted for 2,976 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+       pos_tr_non_d | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.4435938   .1085465    -4.09   0.000    -.6564276     -.23076
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       528           0         528     |
+           J#I#S |       479          44         435     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table2.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table2.txt""':seeout}
+
+. 
+. *Table 3: Services Risk and EU-UK (PPML)
+. gen trade_value_ols=trade_value if log_value_cont!=. //Continously-traded sample used in OLS in Table 2
+(9,468 missing values generated)
+
+. 
+. foreach y in trade_value_ols trade_value trade_imp  {
+  2.         foreach q in 8 12 {
+  3.                 ppmlhdfe `y' ln_mfn_risk_c1_x_me  /*
+>                                         */ if quarter<=`q' & all_but_air==1, absorb(J#I#quarter J#I#S) vce(clu
+> ster J#S#quarter)  nocons
+  4.                 outreg2 using "$main_output/table3", se  excel ctitle(Sample: `y'_eu_q1_q`q', SE: cluster J
+> #S#quarter, FE:J#I#quarter J#I#S ) addstat(R2, e(r2_p)) nocons
+  5.         }
+  6. }
+(dropped 32 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 1.5183e+04  eps = .         iters = 4    tol = 1.0e-04  min(eta) =  -2.33  P   
+Iteration 2:   deviance = 6.4238e+03  eps = 1.36e+00  iters = 3    tol = 1.0e-04  min(eta) =  -3.31      
+Iteration 3:   deviance = 5.4190e+03  eps = 1.85e-01  iters = 2    tol = 1.0e-04  min(eta) =  -4.22      
+Iteration 4:   deviance = 5.3076e+03  eps = 2.10e-02  iters = 2    tol = 1.0e-04  min(eta) =  -4.75      
+Iteration 5:   deviance = 5.3010e+03  eps = 1.26e-03  iters = 2    tol = 1.0e-04  min(eta) =  -5.00      
+Iteration 6:   deviance = 5.3009e+03  eps = 1.80e-05  iters = 2    tol = 1.0e-04  min(eta) =  -5.05      
+Iteration 7:   deviance = 5.3009e+03  eps = 8.90e-09  iters = 2    tol = 1.0e-05  min(eta) =  -5.06   S  
+Iteration 8:   deviance = 5.3009e+03  eps = 3.18e-15  iters = 2    tol = 1.0e-06  min(eta) =  -5.06   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 8 iterations and 19 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      1,744
+Absorbing 2 HDFE groups                           Residual df     =      1,055
+Statistics robust to heteroskedasticity           Wald chi2(1)    =       5.49
+Deviance             =  5300.891039               Prob > chi2     =     0.0191
+Log pseudolikelihood = -7161.784361               Pseudo R2       =     0.9432
+
+Number of clusters (J#S#quarter)=     1,056
+                               (Std. err. adjusted for 1,056 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+    trade_value_ols | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.7673611   .3274514    -2.34   0.019    -1.409154    -.125568
+              _cons |   5.206894   .0120592   431.78   0.000     5.183258     5.23053
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       288           0         288     |
+           J#I#S |       218          36         182     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+(dropped 48 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 2.7114e+04  eps = .         iters = 4    tol = 1.0e-04  min(eta) =  -2.37  P   
+Iteration 2:   deviance = 1.3271e+04  eps = 1.04e+00  iters = 3    tol = 1.0e-04  min(eta) =  -3.36      
+Iteration 3:   deviance = 1.1727e+04  eps = 1.32e-01  iters = 3    tol = 1.0e-04  min(eta) =  -4.18      
+Iteration 4:   deviance = 1.1562e+04  eps = 1.42e-02  iters = 2    tol = 1.0e-04  min(eta) =  -4.74      
+Iteration 5:   deviance = 1.1553e+04  eps = 8.01e-04  iters = 2    tol = 1.0e-04  min(eta) =  -4.98      
+Iteration 6:   deviance = 1.1553e+04  eps = 1.12e-05  iters = 2    tol = 1.0e-04  min(eta) =  -5.04      
+Iteration 7:   deviance = 1.1553e+04  eps = 6.12e-09  iters = 2    tol = 1.0e-05  min(eta) =  -5.04   S  
+Iteration 8:   deviance = 1.1553e+04  eps = 3.80e-15  iters = 2    tol = 1.0e-06  min(eta) =  -5.04   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 8 iterations and 20 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      2,616
+Absorbing 2 HDFE groups                           Residual df     =      1,583
+Statistics robust to heteroskedasticity           Wald chi2(1)    =       7.04
+Deviance             =  11552.86003               Prob > chi2     =     0.0080
+Log pseudolikelihood = -12605.51549               Pseudo R2       =     0.9367
+
+Number of clusters (J#S#quarter)=     1,584
+                               (Std. err. adjusted for 1,584 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+    trade_value_ols | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -1.130294   .4260267    -2.65   0.008    -1.965291   -.2952969
+              _cons |   5.254525   .0104653   502.09   0.000     5.234013    5.275036
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       432           0         432     |
+           J#I#S |       218          36         182     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+(dropped 622 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 2.5900e+04  eps = .         iters = 5    tol = 1.0e-04  min(eta) =  -2.57  P   
+Iteration 2:   deviance = 1.1136e+04  eps = 1.33e+00  iters = 5    tol = 1.0e-04  min(eta) =  -3.61      
+Iteration 3:   deviance = 8.6602e+03  eps = 2.86e-01  iters = 5    tol = 1.0e-04  min(eta) =  -4.66      
+Iteration 4:   deviance = 8.1861e+03  eps = 5.79e-02  iters = 5    tol = 1.0e-04  min(eta) =  -5.69      
+Iteration 5:   deviance = 8.1128e+03  eps = 9.03e-03  iters = 4    tol = 1.0e-04  min(eta) =  -6.54      
+Iteration 6:   deviance = 8.1046e+03  eps = 1.02e-03  iters = 4    tol = 1.0e-04  min(eta) =  -7.07      
+Iteration 7:   deviance = 8.1042e+03  eps = 5.55e-05  iters = 3    tol = 1.0e-04  min(eta) =  -7.26      
+Iteration 8:   deviance = 8.1041e+03  eps = 4.34e-07  iters = 4    tol = 1.0e-05  min(eta) =  -7.28      
+Iteration 9:   deviance = 8.1041e+03  eps = 3.82e-11  iters = 4    tol = 1.0e-06  min(eta) =  -7.28   S  
+Iteration 10:  deviance = 8.1041e+03  eps = 2.02e-16  iters = 4    tol = 1.0e-08  min(eta) =  -7.28   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 10 iterations and 43 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      2,869
+Absorbing 2 HDFE groups                           Residual df     =      1,565
+Statistics robust to heteroskedasticity           Wald chi2(1)    =       8.25
+Deviance             =   8104.14649               Prob > chi2     =     0.0041
+Log pseudolikelihood = -10007.92609               Pseudo R2       =     0.9450
+
+Number of clusters (J#S#quarter)=     1,566
+                               (Std. err. adjusted for 1,566 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+        trade_value | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.6102794   .2125266    -2.87   0.004    -1.026824    -.193735
+              _cons |   5.084401   .0084393   602.46   0.000      5.06786    5.100941
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       351           0         351     |
+           J#I#S |       396          44         352     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+(dropped 795 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 4.5451e+04  eps = .         iters = 5    tol = 1.0e-04  min(eta) =  -2.66  P   
+Iteration 2:   deviance = 2.1129e+04  eps = 1.15e+00  iters = 4    tol = 1.0e-04  min(eta) =  -3.71      
+Iteration 3:   deviance = 1.6974e+04  eps = 2.45e-01  iters = 4    tol = 1.0e-04  min(eta) =  -4.79      
+Iteration 4:   deviance = 1.6144e+04  eps = 5.14e-02  iters = 4    tol = 1.0e-04  min(eta) =  -5.87      
+Iteration 5:   deviance = 1.6005e+04  eps = 8.68e-03  iters = 4    tol = 1.0e-04  min(eta) =  -6.77      
+Iteration 6:   deviance = 1.5988e+04  eps = 1.09e-03  iters = 3    tol = 1.0e-04  min(eta) =  -7.45      
+Iteration 7:   deviance = 1.5986e+04  eps = 8.04e-05  iters = 3    tol = 1.0e-04  min(eta) =  -7.79      
+Iteration 8:   deviance = 1.5986e+04  eps = 1.63e-06  iters = 3    tol = 1.0e-05  min(eta) =  -7.86      
+Iteration 9:   deviance = 1.5986e+04  eps = 1.41e-09  iters = 3    tol = 1.0e-06  min(eta) =  -7.86   S  
+Iteration 10:  deviance = 1.5986e+04  eps = 1.48e-15  iters = 2    tol = 1.0e-07  min(eta) =  -7.86   S  
+Iteration 11:  deviance = 1.5986e+04  eps = 0.00e+00  iters = 2    tol = 1.0e-09  min(eta) =  -7.86   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 11 iterations and 37 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      4,466
+Absorbing 2 HDFE groups                           Residual df     =      2,422
+Statistics robust to heteroskedasticity           Wald chi2(1)    =       9.35
+Deviance             =  15986.36516               Prob > chi2     =     0.0022
+Log pseudolikelihood = -17121.86898               Pseudo R2       =     0.9418
+
+Number of clusters (J#S#quarter)=     2,423
+                               (Std. err. adjusted for 2,423 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+        trade_value | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.8752754   .2862721    -3.06   0.002    -1.436358   -.3141924
+              _cons |    5.12646   .0077602   660.61   0.000      5.11125     5.14167
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       527           0         527     |
+           J#I#S |       411          44         367     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+(dropped 616 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 2.8816e+04  eps = .         iters = 4    tol = 1.0e-04  min(eta) =  -2.66  P   
+Iteration 2:   deviance = 1.2753e+04  eps = 1.26e+00  iters = 2    tol = 1.0e-04  min(eta) =  -3.81      
+Iteration 3:   deviance = 1.0137e+04  eps = 2.58e-01  iters = 2    tol = 1.0e-04  min(eta) =  -4.94      
+Iteration 4:   deviance = 9.6839e+03  eps = 4.67e-02  iters = 2    tol = 1.0e-04  min(eta) =  -6.03      
+Iteration 5:   deviance = 9.6231e+03  eps = 6.32e-03  iters = 2    tol = 1.0e-04  min(eta) =  -6.88      
+Iteration 6:   deviance = 9.6168e+03  eps = 6.55e-04  iters = 2    tol = 1.0e-04  min(eta) =  -7.36      
+Iteration 7:   deviance = 9.6164e+03  eps = 3.24e-05  iters = 2    tol = 1.0e-04  min(eta) =  -7.52      
+Iteration 8:   deviance = 9.6164e+03  eps = 1.87e-07  iters = 2    tol = 1.0e-05  min(eta) =  -7.54      
+Iteration 9:   deviance = 9.6164e+03  eps = 8.23e-12  iters = 2    tol = 1.0e-06  min(eta) =  -7.54   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 9 iterations and 20 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      3,216
+Absorbing 2 HDFE groups                           Residual df     =      1,743
+Statistics robust to heteroskedasticity           Wald chi2(1)    =       7.01
+Deviance             =  9616.442194               Prob > chi2     =     0.0081
+Log pseudolikelihood = -11150.23135               Pseudo R2       =     0.9434
+
+Number of clusters (J#S#quarter)=     1,744
+                               (Std. err. adjusted for 1,744 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+          trade_imp | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -.5632531   .2127633    -2.65   0.008    -.9802614   -.1462448
+              _cons |    5.06455   .0085662   591.22   0.000     5.047761     5.08134
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       352           0         352     |
+           J#I#S |       402          44         358     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+(dropped 768 observations that are either singletons or separated by a fixed effect)
+Iteration 1:   deviance = 5.2043e+04  eps = .         iters = 4    tol = 1.0e-04  min(eta) =  -3.26  P   
+Iteration 2:   deviance = 2.5527e+04  eps = 1.04e+00  iters = 3    tol = 1.0e-04  min(eta) =  -4.94      
+Iteration 3:   deviance = 2.1073e+04  eps = 2.11e-01  iters = 3    tol = 1.0e-04  min(eta) =  -6.61      
+Iteration 4:   deviance = 2.0249e+04  eps = 4.07e-02  iters = 2    tol = 1.0e-04  min(eta) =  -8.07      
+Iteration 5:   deviance = 2.0125e+04  eps = 6.15e-03  iters = 2    tol = 1.0e-04  min(eta) =  -9.12      
+Iteration 6:   deviance = 2.0111e+04  eps = 7.01e-04  iters = 2    tol = 1.0e-04  min(eta) =  -9.78      
+Iteration 7:   deviance = 2.0110e+04  eps = 4.58e-05  iters = 2    tol = 1.0e-04  min(eta) = -10.09      
+Iteration 8:   deviance = 2.0110e+04  eps = 7.84e-07  iters = 2    tol = 1.0e-05  min(eta) = -10.15      
+Iteration 9:   deviance = 2.0110e+04  eps = 4.78e-10  iters = 2    tol = 1.0e-06  min(eta) = -10.15   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 9 iterations and 22 HDFE sub-iterations (tol = 1.0e-08)
+
+HDFE PPML regression                              No. of obs      =      4,980
+Absorbing 2 HDFE groups                           Residual df     =      2,687
+Statistics robust to heteroskedasticity           Wald chi2(1)    =      13.84
+Deviance             =  20110.05983               Prob > chi2     =     0.0002
+Log pseudolikelihood = -19730.91588               Pseudo R2       =     0.9378
+
+Number of clusters (J#S#quarter)=     2,688
+                               (Std. err. adjusted for 2,688 clusters in J#S#quarter)
+-------------------------------------------------------------------------------------
+                    |               Robust
+          trade_imp | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+ln_mfn_risk_c1_x_me |  -1.240398   .3334734    -3.72   0.000    -1.893994   -.5868018
+              _cons |    5.09505    .009097   560.08   0.000      5.07722     5.11288
+-------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------+
+     Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------+---------------------------------------|
+     J#I#quarter |       528           0         528     |
+           J#I#S |       415          44         371     |
+---------------------------------------------------------+
+/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Universities/UK/Warwick/MRes Busin
+> ess & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ repo revised/Results - Paper
+> /main_tables_figures/table3.xml
+dir : {stata `"seeout using "/Users/florianburnat/Library/CloudStorage/Dropbox-Personal/Studies & Research/Unive
+> rsities/UK/Warwick/MRes Business & Management/My Modules/IB9ND Causal Inference/Assessment/Essay/173961-V1/AEJ
+>  repo revised/Results - Paper/main_tables_figures/table3.txt""':seeout}
+
+. 
+. *Table 5: Services Risk and EU-UK (IV)
+. foreach x in c1 total c2 c3 c4 c5 {
+  2.         bysort S: egen stri_`x'_iv=median(stri_`x') if eu_minus_gb~=1 & importer~="GBR" & year==2016 /*
+> */      & (importer=="USA"|importer=="CAN"|importer=="AUS"|importer=="JPN")  
+  3.         
+. *       bysort S: egen stri_`x'_iv=median(stri_`x') if eu_minus_gb~=1 & importer~="GBR" & year==2016  
+.         bysort S: egen stri_`x'_iv_imp=median(stri_`x'_iv)
+  4.                         
+.         
+.         reg stri_`x' stri_`x'_iv_imp if eu_minus_gb==1 & year==2016 & quarter==1
+  5.                          
+.         **first stage of relevant part of variable: high for c1 and c2, low for others so use only c1 as IV (c
+> 2 as robustness?)
+.         reg mfn_risk_`x' stri_`x'_iv_imp if eu_minus_gb==1 & year==2016 & quarter==1
+  6. }
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    648.24
+       Model |  .971410494         1  .971410494   Prob > F        =    0.0000
+    Residual |  .780733675       521  .001498529   R-squared       =    0.5544
+-------------+----------------------------------   Adj R-squared   =    0.5536
+       Total |  1.75214417       522  .003356598   Root MSE        =    .03871
+
+--------------------------------------------------------------------------------
+       stri_c1 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c1_iv_imp |    .861617   .0338412    25.46   0.000     .7951351     .928099
+         _cons |  -.0031133   .0034166    -0.91   0.363    -.0098254    .0035988
+--------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    630.11
+       Model |  .701692774         1  .701692774   Prob > F        =    0.0000
+    Residual |  .580189733       521  .001113608   R-squared       =    0.5474
+-------------+----------------------------------   Adj R-squared   =    0.5465
+       Total |  1.28188251       522  .002455714   Root MSE        =    .03337
+
+--------------------------------------------------------------------------------
+   mfn_risk_c1 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c1_iv_imp |   .7322955   .0291729    25.10   0.000     .6749846    .7896064
+         _cons |  -.0034126   .0029453    -1.16   0.247    -.0091987    .0023736
+--------------------------------------------------------------------------------
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    129.97
+       Model |  .743775744         1  .743775744   Prob > F        =    0.0000
+    Residual |  2.98159129       521  .005722824   R-squared       =    0.1997
+-------------+----------------------------------   Adj R-squared   =    0.1981
+       Total |  3.72536703       522  .007136718   Root MSE        =    .07565
+
+-----------------------------------------------------------------------------------
+       stri_total | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+stri_total_iv_imp |   .4959437   .0435027    11.40   0.000     .4104814    .5814061
+            _cons |   .0962083   .0101856     9.45   0.000     .0761985    .1162182
+-----------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =      7.29
+       Model |  .021167433         1  .021167433   Prob > F        =    0.0072
+    Residual |  1.51319235       521    .0029044   R-squared       =    0.0138
+-------------+----------------------------------   Adj R-squared   =    0.0119
+       Total |  1.53435978       522  .002939387   Root MSE        =    .05389
+
+-----------------------------------------------------------------------------------
+   mfn_risk_total | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+stri_total_iv_imp |   .0836653   .0309913     2.70   0.007     .0227821    .1445486
+            _cons |   .1299427   .0072562    17.91   0.000     .1156877    .1441977
+-----------------------------------------------------------------------------------
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    738.61
+       Model |  .579667591         1  .579667591   Prob > F        =    0.0000
+    Residual |  .408884367       521  .000784807   R-squared       =    0.5864
+-------------+----------------------------------   Adj R-squared   =    0.5856
+       Total |  .988551958       522  .001893778   Root MSE        =    .02801
+
+--------------------------------------------------------------------------------
+       stri_c2 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c2_iv_imp |   1.822897    .067074    27.18   0.000     1.691128    1.954665
+         _cons |  -.0070642   .0027141    -2.60   0.010    -.0123962   -.0017322
+--------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    592.59
+       Model |  .428706986         1  .428706986   Prob > F        =    0.0000
+    Residual |  .376916681       521  .000723449   R-squared       =    0.5321
+-------------+----------------------------------   Adj R-squared   =    0.5312
+       Total |  .805623667       522   .00154334   Root MSE        =     .0269
+
+--------------------------------------------------------------------------------
+   mfn_risk_c2 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c2_iv_imp |   1.567663   .0643986    24.34   0.000     1.441151    1.694176
+         _cons |  -.0005624   .0026059    -0.22   0.829    -.0056817    .0045569
+--------------------------------------------------------------------------------
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =     51.39
+       Model |  .005342458         1  .005342458   Prob > F        =    0.0000
+    Residual |  .054162855       521  .000103959   R-squared       =    0.0898
+-------------+----------------------------------   Adj R-squared   =    0.0880
+       Total |  .059505313       522  .000113995   Root MSE        =     .0102
+
+--------------------------------------------------------------------------------
+       stri_c3 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c3_iv_imp |    .327212   .0456447     7.17   0.000     .2375416    .4168823
+         _cons |   .0070592   .0013424     5.26   0.000      .004422    .0096964
+--------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =     31.71
+       Model |  .002965571         1  .002965571   Prob > F        =    0.0000
+    Residual |  .048720622       521  .000093514   R-squared       =    0.0574
+-------------+----------------------------------   Adj R-squared   =    0.0556
+       Total |  .051686193       522  .000099016   Root MSE        =    .00967
+
+--------------------------------------------------------------------------------
+   mfn_risk_c3 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c3_iv_imp |   .2437883   .0432909     5.63   0.000     .1587422    .3288343
+         _cons |    .007565   .0012732     5.94   0.000     .0050638    .0100662
+--------------------------------------------------------------------------------
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =   1260.41
+       Model |  .428052952         1  .428052952   Prob > F        =    0.0000
+    Residual |  .176938401       521  .000339613   R-squared       =    0.7075
+-------------+----------------------------------   Adj R-squared   =    0.7070
+       Total |  .604991353       522  .001158987   Root MSE        =    .01843
+
+--------------------------------------------------------------------------------
+       stri_c4 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c4_iv_imp |   .7855931   .0221279    35.50   0.000     .7421222    .8290641
+         _cons |   .0050153   .0010331     4.85   0.000     .0029856    .0070449
+--------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =     66.24
+       Model |  .002680903         1  .002680903   Prob > F        =    0.0000
+    Residual |  .021085218       521  .000040471   R-squared       =    0.1128
+-------------+----------------------------------   Adj R-squared   =    0.1111
+       Total |  .023766122       522  .000045529   Root MSE        =    .00636
+
+--------------------------------------------------------------------------------
+   mfn_risk_c4 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c4_iv_imp |   .0621712   .0076387     8.14   0.000     .0471648    .0771777
+         _cons |     .00067   .0003566     1.88   0.061    -.0000307    .0013706
+--------------------------------------------------------------------------------
+(15,576 missing values generated)
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    101.51
+       Model |  .028669777         1  .028669777   Prob > F        =    0.0000
+    Residual |  .147149778       521  .000282437   R-squared       =    0.1631
+-------------+----------------------------------   Adj R-squared   =    0.1615
+       Total |  .175819555       522  .000336819   Root MSE        =    .01681
+
+--------------------------------------------------------------------------------
+       stri_c5 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c5_iv_imp |   .4649941   .0461526    10.08   0.000     .3743261    .5556622
+         _cons |   .0130172   .0019044     6.84   0.000     .0092759    .0167585
+--------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       523
+-------------+----------------------------------   F(1, 521)       =    173.23
+       Model |  .012041404         1  .012041404   Prob > F        =    0.0000
+    Residual |  .036214747       521   .00006951   R-squared       =    0.2495
+-------------+----------------------------------   Adj R-squared   =    0.2481
+       Total |  .048256152       522  .000092445   Root MSE        =    .00834
+
+--------------------------------------------------------------------------------
+   mfn_risk_c5 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+stri_c5_iv_imp |   .3013519    .022896    13.16   0.000     .2563721    .3463317
+         _cons |   .0098423   .0009448    10.42   0.000     .0079862    .0116983
+--------------------------------------------------------------------------------
+
+.                         
+. ** Construct the interactions with IV measure
+. foreach x in  c1 c2 /* total  c3 c4 c5*/ { 
+  2.         foreach br in  me  ma {
+  3.                 gen pre_ln_mfn_risk_`x'_x_`br'_iv=stri_`x'_iv_imp*ln(pre_`br')
+  4.                 gen post_ln_mfn_risk_`x'_x_`br'_iv=stri_`x'_iv_imp*ln(post_`br')
+  5.                 gen ln_mfn_risk_`x'_x_`br'_iv=pre_ln_mfn_risk_`x'_x_`br'_iv+post_ln_mfn_risk_`x'_x_`br'_iv
+  6.         }
+  7. }
+
+. 
+. egen cluster_var=group(J S quarter)
+
+. foreach y in log_value_cont pos_tr_non_d {  
+  2.         foreach q in 8 12 {
+  3.                 ivreghdfe  `y' (ln_mfn_risk_c1_x_me=ln_mfn_risk_c1_x_me_iv) /*
+>                 */ if quarter<=`q' & all_but_air==1, first absorb(J#I#quarter J#I#S) cluster(cluster_var)
+  4.                 outreg2 using "$main_output/table5", se  excel ctitle(Sample: `y' iv all_but_air==1 q`q') a
+> ddstat(F Stat, e(widstat)) nocons dec(3) nor2
+  5.                 }
+  6. } 
+last estimates not found
+r(301);
+
+end of do-file
+
+r(301);
+
+. exit, clear

@@ -1,0 +1,13 @@
+	(1)
+	Sample: log_value_cont_eu_q1_q12
+	SE: cluster J#S#quarter
+	FE:J#I#quarter J#I#S
+VARIABLES	3-month MA
+	
+ln_mfn_risk_c1_x_ma3	-2.290***
+	(0.639)
+	
+Observations	1,308
+R2	0.946
+Robust standard errors in parentheses	
+*** p<0.01, ** p<0.05, * p<0.1	

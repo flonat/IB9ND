@@ -1,0 +1,15 @@
+	(1)	(2)	(3)	(4)
+VARIABLES	Continuous Risk	Category 2	Category 3	Composite Risk
+				
+alt_risk1_x_mean	-0.649			
+	(0.397)			
+alt_risk2_x_mean		1.934***		
+		(0.313)		
+alt_risk3_x_mean			-6.009**	
+			(2.449)	
+comp_risk_x_mean				1.904***
+				(0.437)
+				
+Observations	3,216	3,216	3,216	3,216
+Robust standard errors in parentheses				
+*** p<0.01, ** p<0.05, * p<0.1				
