@@ -45,8 +45,8 @@ To replicate this study from scratch:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/[your-username]/[repo-name]
-   cd [repo-name]
+   git clone https://github.com/flonat/IB9ND
+   cd IB9ND
    ```
 
 2. Download these two large input datasets and place them in the `Data/` folder:
